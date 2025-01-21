@@ -16,6 +16,24 @@ export interface Users {
   password: string | null;
 }
 
+export interface Objectives {
+  id: Generated<string>;
+  title: string;
+  description: string;
+  notifyAt: string;
+  createdAt: Date | null;
+  updatedAt: Date;
+  isCompleted: boolean;
+}
+
+export interface UserObjectiveShares {
+  id: Generated<string>;
+  userful: string;
+  objectheld: string;
+}
+
 export interface DB {
   users: Users;
+  objectives: Objectives;
+  user_objective_shares: UserObjectiveShares;
 }
