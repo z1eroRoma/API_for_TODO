@@ -22,6 +22,7 @@ export async function create(req: FastifyRequest<{ Body: signUpSchema }>, rep: F
     const hashPassword = await bcrypt.hash(req.body.password, 5);
 
     const user = {
+        login: req.body.login,
         name: req.body.name,
         email: req.body.email,
         password: hashPassword

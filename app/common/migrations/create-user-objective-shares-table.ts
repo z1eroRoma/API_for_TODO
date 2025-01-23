@@ -3,6 +3,7 @@ import { type Kysely, sql } from "kysely";
 export async function up(db: Kysely<any>) {
     await db.schema
         .createTable("user_objective_shares")
+        .ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
         .addColumn("useful", "uuid", (col) => col.notNull().references("users.id"))
         .addColumn("objectheld", "uuid", (col) => col.notNull().references("objectives.id"))

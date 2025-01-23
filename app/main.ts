@@ -11,7 +11,6 @@ import { AppErrorPipe, ZodValidatorCompiler } from "./common/config/pipe";
 import { swaggerOption, swaggerUiOption } from "./common/config/swagger";
 import { HttpProvider } from "./modules/_index";
 import { objectiveRouter } from "./modules/objectives/router.objective";
-import { userRouter } from "./modules/user/router.user";
 
 async function app() {
     const app: FastifyInstance = fastify();
@@ -27,7 +26,6 @@ async function app() {
         exposedHeaders: ["Content-Disposition"]
     });
 
-    app.register(userRouter, { prefix: "/user" });
     app.register(objectiveRouter, { prefix: "/api" });
     app.register(fastifySwagger, swaggerOption);
     app.register(fastifySwaggerUi, swaggerUiOption);
@@ -48,5 +46,3 @@ async function app() {
 }
 
 void app();
-
-

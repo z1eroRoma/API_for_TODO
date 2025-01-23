@@ -4,7 +4,7 @@ import { DB, Users } from "../../common/types/kysely/db.type";
 type InsertableUserRowType = Insertable<Users>;
 
 export async function insert(con: Kysely<DB> | Transaction<DB>, entity: InsertableUserRowType) {
-    return await con.insertInto("users").returningAll().values(entity).executeTakeFirstOrThrow();
+    return await con.insertInto("users").returning(["id", "email", "name"]).values(entity).executeTakeFirstOrThrow();
 }
 
 export async function getByEmail(con: Kysely<DB>, email: string) {

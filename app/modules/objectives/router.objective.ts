@@ -8,6 +8,5 @@ export const objectiveRouter = async (app: FastifyInstance) => {
     app.post("/to-do", { schema: { body: createObjectiveSchema } }, objectiveController.createObjective);
     app.patch("/to-do", { schema: { body: updateObjectiveSchema } }, objectiveController.updateObjective);
     app.get("/to-do", { schema: filterObjectiveFSchema }, objectiveController.getObjectives);
-    app.get("/to-do", {}, objectiveController.getObjectiveById);
     app.get("/to-do/:id", {}, objectiveController.getObjectiveById);
 };

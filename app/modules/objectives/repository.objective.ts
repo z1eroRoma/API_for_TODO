@@ -9,6 +9,7 @@ type InsertableObjective = {
 };
 
 export async function insert(con: Kysely<DB>, data: InsertableObjective) {
+    // @ts-ignore
     return await con.insertInto("objectives").returningAll().values(data).executeTakeFirstOrThrow();
 }
 
