@@ -10,3 +10,44 @@ export const objectiveRouter = async (app: FastifyInstance) => {
     app.get("/to-do", { schema: filterObjectiveFSchema }, objectiveController.getObjectives);
     app.get("/to-do/:id", {}, objectiveController.getObjectiveById);
 };
+
+export async function toDoRouter(app: FastifyInstance) {
+    app.get(
+        "/",
+        {
+            schema: {
+                summary: "Get all to-dos",
+                tags: ["To Do"],
+                querystring: {
+                    type: "object",
+                    properties: {
+                        search: { type: "string" },
+                        sort: { type: "string", enum: ["title", "createdAt", "notifyAt"] },
+                        limit: { type: "integer" },
+                        offset: { type: "integer" }
+                    }
+                },
+                response: {
+                    200: {
+                        description: "List of to-dos",
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                id: { type: "string", format: "uuid" },
+                                title: { type: "string" },
+                                isCompleted: { type: "boolean" }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        async (_req, reply) => {
+            reply.send([
+                { id: "1", title: "First task", isCompleted: false },
+                { id: "2", title: "Second task", isCompleted: true }
+            ]);
+        }
+    );
+}
