@@ -1,6 +1,7 @@
 import { Insertable, Kysely, Updateable } from "kysely";
 import { HttpStatusCode } from "../../common/enum/http-status-code";
 import { DB, Objectives } from "../../common/types/kysely/db.type";
+import { FilterObjectiveSchema } from "./schemas/filter-objective.schema";
 
 type InsertableObjective = Insertable<Objectives>;
 type UpdateablyObjective = Updateable<Objectives>;
@@ -26,7 +27,7 @@ export async function getById(con: Kysely<DB>, id: string) {
     return objective;
 }
 
-export async function getAll(con: Kysely<DB>, filters: any) {
+export async function getAll(con: Kysely<DB>, filters: FilterObjectiveSchema) {
     let query = con.selectFrom("objectives").selectAll();
 
     if (filters.search) {
@@ -36,7 +37,7 @@ export async function getAll(con: Kysely<DB>, filters: any) {
         query = query.where("isCompleted", "=", filters.isCompleted);
     }
     if (filters.sortBy) {
-        query = query.orderBy(filters.sortBy, "asc");
+        query = query.orderBy(filters.sortBy, filters.sortDirection || "asc");
     }
     if (filters.limit) {
         query = query.limit(filters.limit);
@@ -44,14 +45,5 @@ export async function getAll(con: Kysely<DB>, filters: any) {
     if (filters.offset) {
         query = query.offset(filters.offset);
     }
-    const objectives = await query.execute();
-    if (!objectives || objectives.length === 0) {
-        throw new Error(
-            JSON.stringify({
-                message: "No objectives found for the provided filters",
-                status: HttpStatusCode.NOT_FOUND
-            })
-        );
-    }
-    return objectives;
+    return query.execute();
 }

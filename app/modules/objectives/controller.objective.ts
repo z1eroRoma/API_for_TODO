@@ -18,12 +18,19 @@ export async function updateObjective(req: FastifyRequest<IUpdateObjective>, rep
 }
 
 export async function getObjectives(req: FastifyRequest<GetObjectivesRequest>, rep: FastifyReply) {
-    const { search, sortBy, isCompleted, limit, offset } = req.query as any;
-    const objectives = await objectiveRepository.getAll(sqlCon, { search, sortBy, isCompleted, limit, offset });
+    const objectives = await objectiveRepository.getAll(sqlCon, req.query);
     return rep.code(HttpStatusCode.OK).send(objectives);
 }
 
 export async function getObjectiveById(req: FastifyRequest<{ Params: ParamsSchema }>, rep: FastifyReply) {
     const objective = await objectiveRepository.getById(sqlCon, req.params.id);
+    if (!objective) {
+        return rep.code(HttpStatusCode.NOT_FOUND).send(
+            JSON.stringify({
+                message: `Objective with ID ${req.params.id} not found`,
+                status: HttpStatusCode.NOT_FOUND
+            })
+        );
+    }
     return rep.code(HttpStatusCode.OK).send(objective);
 }

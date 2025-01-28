@@ -1,0 +1,111 @@
+paths:
+  /to-do:
+    post:
+      summary: "Create a new to-do item"
+      tags:
+        - To Do
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Buy groceries"
+                description:
+                  type: string
+                  example: "Milk, bread, and eggs"
+                notifyAt:
+                  type: string
+                  format: date-time
+                  example: "2025-01-25T15:00:00Z"
+      responses:
+        201:
+          description: "To-do created successfully"
+
+    patch:
+      summary: "Edit an existing to-do item"
+      tags:
+        - To Do
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                title:
+                  type: string
+                  example: "Buy groceries (updated)"
+                description:
+                  type: string
+                  example: "Updated: Milk, bread, eggs, and butter"
+                is_completed:
+                  type: boolean
+                  example: false
+      responses:
+        200:
+          description: "To-do updated successfully"
+        404:
+          description: "To-do not found"
+
+    get:
+      summary: "Get a list of to-do items"
+      tags:
+        - To Do
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: "Search by title"
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [ title, createdAt, notifyAt ]
+          description: "Sort by title, createdAt, or notifyAt"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            example: 10
+          description: "Number of items to return"
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            example: 0
+          description: "Number of items to skip"
+        - in: query
+          name: is_completed
+          schema:
+            type: boolean
+          description: "Filter by completion status"
+      responses:
+        200:
+          description: "List of to-do items"
+
+  /to-do/{to-do-id}:
+    get:
+      summary: "Get a specific to-do item by ID"
+      tags:
+        - To Do
+      parameters:
+        - in: path
+          name: to-do-id
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+          description: "The ID of the to-do item"
+      responses:
+        200:
+          description: "To-do item details"
+        404:
+          description: "To-do not found"
