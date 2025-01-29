@@ -5,8 +5,8 @@ export async function up(db: Kysely<any>) {
         .createTable("user_objective_shares")
         .ifNotExists()
         .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
-        .addColumn("useful", "uuid", (col) => col.notNull().references("users.id"))
-        .addColumn("objectheld", "uuid", (col) => col.notNull().references("objectives.id"))
+        .addColumn("useful", "uuid", (col) => col.notNull().references("users.id").onDelete("cascade"))
+        .addColumn("objectheld", "uuid", (col) => col.notNull().references("objectives.id").onDelete("cascade"))
         .execute();
 }
 

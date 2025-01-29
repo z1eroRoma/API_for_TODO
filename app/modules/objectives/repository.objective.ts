@@ -47,3 +47,38 @@ export async function getAll(con: Kysely<DB>, filters: FilterObjectiveSchema) {
     }
     return query.execute();
 }
+
+export async function shareObjective(db: Kysely<DB>, objectiveId: string, userId: string) {
+    await db
+        .insertInto("user_objective_shares")
+        .values({ objectheld: objectiveId, userful: userId })
+        .onConflict((oc) => oc.columns(["objectheld", "userful"]).doNothing()) // Не добавлять дубликаты
+        .execute();
+}
+
+export async function revokeAccess(db: Kysely<DB>, objectiveId: string, userId: string) {
+    await db.deleteFrom("user_objective_shares").where("objectheld", "=", objectiveId).where("userful", "=", userId).execute();
+}
+
+export async function listGrants(db: Kysely<DB>, objectiveId: string) {
+    return db
+        .selectFrom("user_objective_shares")
+        .innerJoin("users", "users.id", "user_objective_shares.userful")
+        .select(["users.id", "users.login", "users.email", "users.name"])
+        .where("user_objective_shares.objectheld", "=", objectiveId)
+        .execute();
+}
+
+export async function hasAccess(db: Kysely<DB>, objectiveId: string, userId?: string) {
+    if (!userId) return false;
+
+    const result = await db
+        .selectFrom("objectives")
+        .leftJoin("user_objective_shares", "user_objective_shares.objectheld", "objectives.id")
+        .select(["objectives.id"])
+        .where("objectives.id", "=", objectiveId)
+        .where((eb) => eb.or([eb("objectives.creatorId", "=", userId), eb("user_objective_shares.userful", "=", userId)]))
+        .executeTakeFirst();
+
+    return !!result;
+}

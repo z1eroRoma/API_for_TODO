@@ -25,6 +25,7 @@ export interface Objectives {
   createdAt: Date | null;
   updatedAt: Date;
   isCompleted: boolean;
+  creatorId: string;
 }
 
 export interface UserObjectiveShares {

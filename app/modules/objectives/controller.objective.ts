@@ -34,3 +34,49 @@ export async function getObjectiveById(req: FastifyRequest<{ Params: ParamsSchem
     }
     return rep.code(HttpStatusCode.OK).send(objective);
 }
+
+export async function shareObjective(req: FastifyRequest<{ Params: {id: string }; Body: { userId: string} }>, rep: FastifyReply) {
+    const { id } = req.params;
+    const { userId } = req.body;
+    const objective = await objectiveRepository.getById(sqlCon, id);
+    if (!objective) {
+        return rep.code(HttpStatusCode.NOT_FOUND).send({ message: "Objective not found" });
+    }
+    if (objective.creatorId !== req.user?.id) {
+        return rep.code(HttpStatusCode.FORBIDDEN).send({ message: "Access denied" });
+    }
+    await objectiveRepository.shareObjective(sqlCon, id, userId);
+    return rep.code(HttpStatusCode.OK).send({ message: "Access granted" });
+}
+
+export async function revokeObjectiveAccess(req: FastifyRequest<{ Params: { id: string }; Body: { userId: string } }>, rep: FastifyReply) {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    // Проверяем, существует ли задача и является ли пользователь её владельцем
+    const objective = await objectiveRepository.getById(sqlCon, id);
+    if (!objective) {
+        return rep.code(HttpStatusCode.NOT_FOUND).send({ message: "Objective not found" });
+    }
+    if (objective.creatorId !== req.user?.id) {
+        return rep.code(HttpStatusCode.FORBIDDEN).send({ message: "Access denied" });
+    }
+
+    // Удаляем доступ
+    await objectiveRepository.revokeAccess(sqlCon, id, userId);
+    return rep.code(HttpStatusCode.OK).send({ message: "Access revoked" });
+}
+
+export async function listObjectiveGrants(req: FastifyRequest<{ Params: { id: string } }>, rep: FastifyReply) {
+    const { id } = req.params;
+
+    // Проверяем, существует ли задача и есть ли у пользователя доступ к ней
+    const hasAccess = await objectiveRepository.hasAccess(sqlCon, id, req.user?.id);
+    if (!hasAccess) {
+        return rep.code(HttpStatusCode.FORBIDDEN).send({ message: "Access denied" });
+    }
+
+    // Получаем список пользователей с доступом
+    const grants = await objectiveRepository.listGrants(sqlCon, id);
+    return rep.code(HttpStatusCode.OK).send(grants);
+}
