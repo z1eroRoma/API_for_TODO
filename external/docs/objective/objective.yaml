@@ -109,3 +109,96 @@ paths:
           description: "To-do item details"
         404:
           description: "To-do not found"
+
+  /to-do/{to-do-id}/share:
+    post:
+      summary: "Share a to-do item with another user"
+      tags:
+        - To Do
+      parameters:
+        - in: path
+          name: to-do-id
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  example: "789e1234-a567-b890-1234-567890abcdef"
+      responses:
+        200:
+          description: "Access granted"
+        403:
+          description: "Forbidden - Only the owner can share the to-do"
+        404:
+          description: "To-do not found"
+
+  /to-do/{to-do-id}/revoke:
+    delete:
+      summary: "Revoke access to a to-do item from another user"
+      tags:
+        - To Do
+      parameters:
+        - in: path
+          name: to-do-id
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  example: "789e1234-a567-b890-1234-567890abcdef"
+      responses:
+        200:
+          description: "Access revoked"
+        403:
+          description: "Forbidden - Only the owner can revoke access"
+        404:
+          description: "To-do not found"
+
+  /to-do/{to-do-id}/list-grants:
+    get:
+      summary: "List users who have access to a to-do item"
+      tags:
+        - To Do
+      parameters:
+        - in: path
+          name: to-do-id
+          required: true
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        200:
+          description: "List of users with access"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                      format: uuid
+                      example: "789e1234-a567-b890-1234-567890abcdef"
+        403:
+          description: "Forbidden - Only the owner can view access list"
+        404:
+          description: "To-do not found"

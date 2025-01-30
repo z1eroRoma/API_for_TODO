@@ -1,26 +1,18 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Kysely } from "kysely";
-import { HttpStatusCode } from "../enum/http-status-code";
-import { DB } from "../types/kysely/db.type";
+import * as objectiveRepository from "../../modules/objectives/repository.objective";
+import { sqlCon } from "../config/kysely-config";
 
-interface OwnershipParams {
-    id: string;
+export async function checkAccess(req: FastifyRequest<{ Params: { id: string } }>, rep: FastifyReply) {
+    const userId = req.user.id;
+    const hasPermission = await objectiveRepository.hasAccess(sqlCon, <string>userId, req.params.id);
+    if (!hasPermission) {
+        return rep.code(403).send({ message: "Forbidden" });
+    }
 }
 
-export const createCheckOwnership = (db: Kysely<DB>) => {
-    return async (req: FastifyRequest<{ Params: OwnershipParams }>, rep: FastifyReply) => {
-        const userId = req.user?.id;
-        if (!userId) {
-            return rep.status(HttpStatusCode.UNAUTHORIZED).send({ message: "Unauthorized" });
-        }
-        const objective = await db.selectFrom("objectives").select(["id", "creatorId"]).where("id", "=", req.params.id).executeTakeFirst();
-        if (!objective) {
-            return rep.status(HttpStatusCode.NOT_FOUND).send({ message: "Objective not found" });
-        }
-        if (objective.creatorId !== userId) {
-            return rep.status(HttpStatusCode.FORBIDDEN).send({ message: "Access denied" });
-        }
+export async function checkOwnership(req: FastifyRequest<{ Params: { id: string } }>, rep: FastifyReply) {
+    const objective = await objectiveRepository.getById(sqlCon, req.params.id);
+    if (!objective || objective.creatorId !== req.user.id) {
+        return rep.code(403).send({ message: "Forbidden" });
     }
-
-
-};
+}
