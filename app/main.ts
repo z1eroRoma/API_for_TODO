@@ -2,6 +2,7 @@ import { fastifyCors } from "@fastify/cors";
 import { fastifyJwt } from "@fastify/jwt";
 import { fastifySwagger } from "@fastify/swagger";
 import { fastifySwaggerUi } from "@fastify/swagger-ui";
+import dotenv from "dotenv";
 import { fastify, type FastifyInstance } from "fastify";
 import { globalAuthHook } from "./common/config/global-auth";
 import { jwtOption } from "./common/config/jwt";
@@ -12,6 +13,7 @@ import { swaggerOption, swaggerUiOption } from "./common/config/swagger";
 import { HttpProvider } from "./modules/_index";
 import { objectiveRouter } from "./modules/objectives/router.objective";
 
+dotenv.config();
 async function app() {
     const app: FastifyInstance = fastify();
     const port: number = Number(process.env.APP_PORT!);

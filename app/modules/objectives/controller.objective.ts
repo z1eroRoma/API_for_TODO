@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { sqlCon } from "../../common/config/kysely-config";
+import { sendEmail } from "../../common/services/emailService";
+import { getById } from "../user/repository.user";
 import * as objectiveRepository from "./repository.objective";
 import type { CreateObjectiveRequest } from "./schemas/create-objective.schema";
 import type { GetObjectivesRequest } from "./schemas/filter-objective.schema";
@@ -37,7 +39,16 @@ export async function getObjectiveById(req: FastifyRequest<{ Params: ParamsSchem
 
 export async function shareObjective(req: FastifyRequest<{ Params: { id: string }; Body: { userId: string } }>, rep: FastifyReply) {
     await objectiveRepository.grantAccess(sqlCon, req.params.id, req.body.userId);
-    return rep.code(HttpStatusCode.OK).send({ message: "Access granted" });
+    const user = await getById(sqlCon, req.body.userId);
+    if (!user || !user.email) {
+        return rep.code(HttpStatusCode.NOT_FOUND).send({ message: "User email not found" });
+    }
+    const objective = await objectiveRepository.getById(sqlCon, req.params.id);
+    if (!objective) {
+        return rep.code(HttpStatusCode.NOT_FOUND).send({ message: "Objective not found" });
+    }
+    await sendEmail(user.email, "Вам выдан доступ к задаче", `Вы получили доступ к задаче: "${objective.title}". Теперь вы можете её посмотреть`);
+    return rep.code(HttpStatusCode.OK).send({ message: "Access granted and email sent" });
 }
 
 export async function revokeObjective(req: FastifyRequest<{ Params: { id: string }; Body: { userId: string } }>, rep: FastifyReply) {
