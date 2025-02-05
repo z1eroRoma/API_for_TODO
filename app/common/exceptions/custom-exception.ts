@@ -23,3 +23,10 @@ export class CustomException extends Error {
         Object.setPrototypeOf(this, CustomException.prototype);
     }
 }
+
+export class AccessDeniedException extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "AccessDeniedException";
+    }
+}

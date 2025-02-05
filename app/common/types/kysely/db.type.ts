@@ -30,8 +30,8 @@ export interface Objectives {
 
 export interface UserObjectiveShares {
   id: Generated<string>;
-  userful: string;
-  objectheld: string;
+  userId: string;
+  objectiveId: string;
 }
 
 export interface DB {

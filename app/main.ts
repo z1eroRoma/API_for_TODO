@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import { fastify, type FastifyInstance } from "fastify";
 import { globalAuthHook } from "./common/config/global-auth";
 import { jwtOption } from "./common/config/jwt";
-import { KyselyConfig } from "./common/config/kysely-config";
+import { KyselyConfig, sqlCon } from "./common/config/kysely-config";
 import { logger } from "./common/config/pino-plugin";
 import { AppErrorPipe, ZodValidatorCompiler } from "./common/config/pipe";
 import { swaggerOption, swaggerUiOption } from "./common/config/swagger";
@@ -19,6 +19,7 @@ async function app() {
     const port: number = Number(process.env.APP_PORT!);
     const host: string = process.env.APP_HOST!;
 
+    app.decorate("sqlCon", sqlCon);
     app.setValidatorCompiler(ZodValidatorCompiler);
     app.setErrorHandler(AppErrorPipe);
     await app.register(fastifyCors, {

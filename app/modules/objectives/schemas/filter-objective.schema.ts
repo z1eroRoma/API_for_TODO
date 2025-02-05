@@ -5,7 +5,10 @@ const filterObjectiveSchema = z.object({
     search: z.string().optional(),
     sortBy: z.enum(["title", "createdAt", "notifyAt"]).optional(),
     sortDirection: z.enum(["asc", "desc"]).optional(),
-    isCompleted: z.boolean().nullable().transform((val) => val ?? undefined),
+    isCompleted: z
+        .boolean()
+        .nullable()
+        .transform((val) => val ?? undefined),
     limit: z.number().int().positive().transform(Number),
     offset: z.number().int().nonnegative().transform(Number)
 });
