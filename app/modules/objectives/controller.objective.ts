@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { sendEmail } from "../../common/config/email-service";
 import { sqlCon } from "../../common/config/kysely-config";
 import { HttpStatusCode } from "../../common/enum/http-status-code";
-import { checkCreatorAccess, checkSharedAccess } from "../../common/middleware/guard";
-import { sendEmail } from "../../common/services/emailService";
+import { checkCreatorAccess } from "../../common/middleware/guard";
 import { getById } from "../user/repository.user";
 import * as objectiveRepository from "./repository.objective";
 import type { CreateObjectiveRequest } from "./schemas/create-objective.schema";
@@ -10,7 +10,7 @@ import type { GetObjectivesRequest } from "./schemas/filter-objective.schema";
 import type { IUpdateObjective, ParamsSchema } from "./schemas/update-objective.schema";
 
 export async function createObjective(req: FastifyRequest<CreateObjectiveRequest>, rep: FastifyReply) {
-    const objective = await objectiveRepository.insert(sqlCon, { ...req.body, updatedAt: new Date() });
+    const objective = await objectiveRepository.insert(sqlCon, req.body);
     return rep.code(HttpStatusCode.CREATED).send(objective);
 }
 
@@ -26,8 +26,6 @@ export async function getObjectives(req: FastifyRequest<GetObjectivesRequest>, r
 }
 
 export async function getObjectiveById(req: FastifyRequest<{ Params: ParamsSchema }>, rep: FastifyReply) {
-    await checkCreatorAccess(req);
-    await checkSharedAccess(req);
     const objective = await objectiveRepository.getById(sqlCon, req.params.id);
     if (!objective) {
         return rep.code(HttpStatusCode.NOT_FOUND).send(
@@ -50,7 +48,7 @@ export async function shareObjective(req: FastifyRequest<{ Params: { id: string 
     if (!objective) {
         return rep.code(HttpStatusCode.NOT_FOUND).send({ message: "Objective not found" });
     }
-    await objectiveRepository.grantAccess(sqlCon, req.params.id, req.body.userId);
+    await objectiveRepository.grantAccess(sqlCon, { objectiveId: req.params.id, userId: req.body.userId });
     await sendEmail(user.email, "Вам выдан доступ к задаче", `Вы получили доступ к задаче: "${objective.title}". Теперь вы можете её посмотреть`);
     return rep.code(HttpStatusCode.OK).send({ message: "Access granted and email sent" });
 }

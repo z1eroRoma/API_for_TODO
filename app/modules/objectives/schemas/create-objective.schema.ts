@@ -6,7 +6,7 @@ export const createObjectiveSchema = z.object({
     creatorId: z.string().uuid(),
     notifyAt: z.string().datetime(),
     isCompleted: z.boolean().default(false),
-    updateAt: z.string().datetime().optional()
+    updatedAt: z.string().datetime().optional()
 });
 
 export type CreateObjectiveSchema = z.infer<typeof createObjectiveSchema>;

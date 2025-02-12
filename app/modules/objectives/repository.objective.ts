@@ -45,7 +45,7 @@ export async function hasAccess(db: Kysely<DB>, userId: string, objectiveId: str
         .selectFrom("objectives")
         .leftJoin("user_objective_shares", "user_objective_shares.objectiveId", "objectives.id")
         .select(["objectives.creatorId", "user_objective_shares.userId"])
-        .where("objectives.creatorId", "=", objectiveId)
+        .where("objectives.id", "=", objectiveId)
         .where((eb) => eb.or([eb("objectives.creatorId", "=", userId), eb("user_objective_shares.userId", "=", userId)]))
         .executeTakeFirst();
     return !!access;

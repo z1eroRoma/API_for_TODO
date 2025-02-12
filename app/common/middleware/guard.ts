@@ -5,10 +5,7 @@ import { AccessDeniedException } from "../exceptions/custom-exception";
 import { DB } from "../types/kysely/db.type";
 
 export async function checkCreatorAccess(req: FastifyRequest<{ Params: { id: string } }>) {
-    const userId = req.user?.id;
-    if (!userId) {
-        throw new AccessDeniedException("User is not authenticated");
-    }
+    const userId = req.user!.id;
     const objectiveId = req.params.id;
     const objective = await getById(req.server.sqlCon as Kysely<DB>, objectiveId);
     if (!objective) {
@@ -17,6 +14,7 @@ export async function checkCreatorAccess(req: FastifyRequest<{ Params: { id: str
     if (objective.creatorId !== userId) {
         throw new AccessDeniedException("You are not the creator of this objective");
     }
+    return;
 }
 
 export async function checkSharedAccess(req: FastifyRequest<{ Params: { id: string } }>) {
@@ -30,4 +28,5 @@ export async function checkSharedAccess(req: FastifyRequest<{ Params: { id: stri
     if (!hasAccessToObjective) {
         throw new AccessDeniedException("You do not have access to this objective");
     }
+    return;
 }

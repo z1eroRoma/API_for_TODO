@@ -1,3 +1,4 @@
+import auth from "@fastify/auth";
 import { fastifyCors } from "@fastify/cors";
 import { fastifyJwt } from "@fastify/jwt";
 import { fastifySwagger } from "@fastify/swagger";
@@ -6,12 +7,11 @@ import dotenv from "dotenv";
 import { fastify, type FastifyInstance } from "fastify";
 import { globalAuthHook } from "./common/config/global-auth";
 import { jwtOption } from "./common/config/jwt";
-import { KyselyConfig, sqlCon } from "./common/config/kysely-config";
+import { KyselyConfig } from "./common/config/kysely-config";
 import { logger } from "./common/config/pino-plugin";
 import { AppErrorPipe, ZodValidatorCompiler } from "./common/config/pipe";
 import { swaggerOption, swaggerUiOption } from "./common/config/swagger";
 import { HttpProvider } from "./modules/_index";
-import { objectiveRouter } from "./modules/objectives/router.objective";
 
 dotenv.config();
 async function app() {
@@ -19,9 +19,9 @@ async function app() {
     const port: number = Number(process.env.APP_PORT!);
     const host: string = process.env.APP_HOST!;
 
-    app.decorate("sqlCon", sqlCon);
     app.setValidatorCompiler(ZodValidatorCompiler);
     app.setErrorHandler(AppErrorPipe);
+    await app.register(auth);
     await app.register(fastifyCors, {
         origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -29,7 +29,6 @@ async function app() {
         exposedHeaders: ["Content-Disposition"]
     });
 
-    app.register(objectiveRouter, { prefix: "/api" });
     app.register(fastifySwagger, swaggerOption);
     app.register(fastifySwaggerUi, swaggerUiOption);
     await app.register(KyselyConfig);
