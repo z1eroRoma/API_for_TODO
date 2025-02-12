@@ -23,7 +23,7 @@ export interface Objectives {
   description: string;
   notifyAt: string;
   createdAt: Date | null;
-  updatedAt: Date;
+  updatedAt: Date | null;
   isCompleted: boolean;
   creatorId: string;
 }
